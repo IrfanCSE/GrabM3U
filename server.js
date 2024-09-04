@@ -46,9 +46,11 @@ app.get('/generate-m3u', async (req, res) => {
         res.setHeader('Content-Type', 'audio/x-mpegurl');
         res.send(m3uContent);
 
-        await browser.close();
     } catch (error) {
         res.status(500).send('An error occurred while fetching the page.');
+    }
+    finally{
+        await browser.close();
     }
 });
 
