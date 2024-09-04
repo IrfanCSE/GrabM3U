@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M3U Playlist Generator</title>
+</head>
+<body>
+    <h1>Generate M3U Playlist</h1>
+    <input type="text" id="pageUrl" placeholder="Enter Page URL">
+    <button onclick="generateM3U()">Generate M3U</button>
+
+    <script>
+        function generateM3U() {
+            const pageUrl = document.getElementById('pageUrl').value;
+            if (!pageUrl) {
+                alert("Please enter a page URL.");
+                return;
+            }
+
+            // Redirect to server endpoint with URL as query parameter
+            window.location.href = `/generate-m3u?url=${encodeURIComponent(pageUrl)}`;
+        }
+    </script>
+</body>
+</html>
