@@ -15,19 +15,26 @@ app.get('/generate-m3u', async (req, res) => {
         return res.status(400).send('URL is required');
     }
 
+    let browser;
     try {
-        const browser = await puppeteer.launch();
+        browser = await puppeteer.launch({ headless: false });
         const page = await browser.newPage();
-        await page.goto(pageUrl);
+        await page.goto(pageUrl, { waitUntil: 'networkidle2', timeout: 60000 });
         const html = await page.content();
         const $ = cheerio.load(html);
 
         // Find all video download links
+        const videoExtensions = ['.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.3gp', '.mpeg', '.mpg', '.ogg'];
         const videoLinks = [];
+
         $('a').each((index, element) => {
-            const href = $(element).attr('href');
-            if (href && (href.endsWith('.mp4') || href.includes('download'))) {
-                videoLinks.push(href);
+            let href = $(element).attr('href');
+            if (href) {
+                const isVideoFile = videoExtensions.some(ext => href.toLowerCase().endsWith(ext));
+                if (isVideoFile || href.includes('download')) {
+                    href = new URL(href, pageUrl).href;
+                    videoLinks.push(href);
+                }
             }
         });
 
@@ -47,10 +54,12 @@ app.get('/generate-m3u', async (req, res) => {
         res.send(m3uContent);
 
     } catch (error) {
+        console.error("Error occurred:", error);
         res.status(500).send('An error occurred while fetching the page.');
-    }
-    finally{
-        await browser.close();
+    } finally {
+        if (browser) {
+            await browser.close();
+        }
     }
 });
 
